@@ -106,6 +106,7 @@ require('lazy').setup({
       -- Adds LSP completion capabilities
       'hrsh7th/cmp-nvim-lsp',
       'hrsh7th/cmp-path',
+      'hrsh7th/cmp-buffer',
 
       -- Adds a number of user-friendly snippets
       'rafamadriz/friendly-snippets',
@@ -113,7 +114,28 @@ require('lazy').setup({
   },
 
   -- Useful plugin to show you pending keybinds.
-  { 'folke/which-key.nvim', opts = {} },
+{ -- Useful plugin to show you pending keybinds.
+    'folke/which-key.nvim',
+    event = 'VimEnter', -- Sets the loading event to 'VimEnter'
+    config = function() -- This is the function that runs, AFTER loading
+      require('which-key').setup()
+
+      -- Document existing key chains
+      require('which-key').register {
+        ['<leader>c'] = { name = '[C]ode', _ = 'which_key_ignore' },
+        ['<leader>d'] = { name = '[D]ocument', _ = 'which_key_ignore' },
+        ['<leader>r'] = { name = '[R]ename', _ = 'which_key_ignore' },
+        ['<leader>s'] = { name = '[S]earch', _ = 'which_key_ignore' },
+        ['<leader>w'] = { name = '[W]orkspace', _ = 'which_key_ignore' },
+        ['<leader>t'] = { name = '[T]oggle', _ = 'which_key_ignore' },
+        ['<leader>h'] = { name = 'Git [H]unk', _ = 'which_key_ignore' },
+      }
+      -- visual mode
+      require('which-key').register({
+        ['<leader>h'] = { 'Git [H]unk' },
+      }, { mode = 'v' })
+    end,
+  },
   {
     -- Adds git related signs to the gutter, as well as utilities for managing changes
     'lewis6991/gitsigns.nvim',
@@ -191,10 +213,19 @@ require('lazy').setup({
 
   {
     -- Theme inspired by Atom
+    -- fall back theme
     'navarasu/onedark.nvim',
-    priority = 1000,
+    priority = 2000,
     config = function()
       vim.cmd.colorscheme 'onedark'
+    end,
+  },
+  {
+    -- Theme color blind friendly
+    'ttak0422/morimo',
+    priority = 1000,
+    config = function()
+      vim.cmd.colorscheme 'morimo'
     end,
   },
 
@@ -252,6 +283,13 @@ require('lazy').setup({
       'nvim-treesitter/nvim-treesitter-textobjects',
     },
     build = ':TSUpdate',
+  },
+
+  {
+    "iamcco/markdown-preview.nvim",
+    cmd = { "MarkdownPreviewToggle", "MarkdownPreview", "MarkdownPreviewStop" },
+    ft = { "markdown" },
+    build = function() vim.fn["mkdp#util#install"]() end,
   },
 
   -- NOTE: Next Step on Your Neovim Journey: Add/Configure additional "plugins" for kickstart
@@ -537,22 +575,23 @@ local on_attach = function(_, bufnr)
 end
 
 -- document existing key chains
-require('which-key').register {
-  ['<leader>c'] = { name = '[C]ode', _ = 'which_key_ignore' },
-  ['<leader>d'] = { name = '[D]ocument', _ = 'which_key_ignore' },
-  ['<leader>g'] = { name = '[G]it', _ = 'which_key_ignore' },
-  ['<leader>h'] = { name = 'Git [H]unk', _ = 'which_key_ignore' },
-  ['<leader>r'] = { name = '[R]ename', _ = 'which_key_ignore' },
-  ['<leader>s'] = { name = '[S]earch', _ = 'which_key_ignore' },
-  ['<leader>t'] = { name = '[T]oggle', _ = 'which_key_ignore' },
-  ['<leader>w'] = { name = '[W]orkspace', _ = 'which_key_ignore' },
-}
--- register which-key VISUAL mode
--- required for visual <leader>hs (hunk stage) to work
-require('which-key').register({
-  ['<leader>'] = { name = 'VISUAL <leader>' },
-  ['<leader>h'] = { 'Git [H]unk' },
-}, { mode = 'v' })
+--require('which-key').register {
+--  ['<leader>c'] = { name = '[C]ode', _ = 'which_key_ignore' },
+--  ['<leader>d'] = { name = '[D]ocument', _ = 'which_key_ignore' },
+--  ['<leader>g'] = { name = '[G]it', _ = 'which_key_ignore' },
+--  ['<leader>h'] = { name = 'Git [H]unk', _ = 'which_key_ignore' },
+--  ['<leader>r'] = { name = '[R]ename', _ = 'which_key_ignore' },
+--  ['<leader>s'] = { name = '[S]earch', _ = 'which_key_ignore' },
+--  ['<leader>t'] = { name = '[T]oggle', _ = 'which_key_ignore' },
+--  ['<leader>w'] = { name = '[W]orkspace', _ = 'which_key_ignore' },
+--  ['<leader>dd'] = { name = '[D]ocument [D]elete', _ = 'which_key_ignore' },
+--}
+---- register which-key VISUAL mode
+---- required for visual <leader>hs (hunk stage) to work
+--require('which-key').register({
+--  ['<leader>'] = { name = 'VISUAL <leader>' },
+--  ['<leader>h'] = { 'Git [H]unk' },
+--}, { mode = 'v' })
 
 -- mason-lspconfig requires that these setup functions are called in this order
 -- before setting up the servers.
@@ -661,6 +700,20 @@ cmp.setup {
     { name = 'path' },
   },
 }
+
+vim.api.nvim_set_keymap('n', '<leader>ddw', ":%s/\\s\\+$//e \n", {})
+
+vim.opt.tabstop = 4
+vim.opt.shiftwidth = 4
+vim.opt.expandtab = true
+
+vim.opt.scrolloff = 10
+vim.opt.number = true
+vim.opt.relativenumber = true
+vim.opt.mouse = "a"
+vim.opt.ignorecase = true
+vim.opt.smartcase = true
+
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
